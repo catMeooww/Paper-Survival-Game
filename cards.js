@@ -2,7 +2,7 @@
 var cardsAvailable = ["axe", "creeper", "ender", "enderman", "pick", "shield", "stone", "sword", "Tnt", "Wood"];
 
 //card generator system
-src = "/assets/cards/";
+src = "./assets/cards/";
 class Card {
     constructor(id = 0, card, power = 1) {
         this.id = id
