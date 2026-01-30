@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Survival Game</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+    <script src="server.js"></script>
+    <script src="cards.js"></script>
+    <script src="main.js"></script>
+    <style>
+        h1 {
+            font-size: 35px;
+        }
+
+        h1:hover {
+            color: chartreuse;
+        }
+
+        #card-carousel {
+            display: flex;
+            overflow-x: scroll;
+        }
+
+        #randcard .card {
+            width: 200px;
+            height: 300px;
+        }
+
+        #cardtypes img {
+            width: 100px;
+        }
+
+        #cardtypes div {
+            width: 25%;
+            border: 1px #ffffffaa solid;
+        }
+
+        #cardtypes div:hover {
+            width: 40%;
+        }
+    </style>
+</head>
+
+<body onload="loadedPage()">
+    <div id="menu">
+        <button id="Header" onclick="redirect(0)">Paper Survival Game</button>
+        <button class="top-option" onclick="redirect(0)">Return</button>
+        <button class="top-option" onclick="redirect(1)" id="login">Log-In</button>
+    </div>
+    <section id="mainbody">
+        <br><br>
+        <h1>About Paper Survival Game</h1>
+        <div id="game"></div>
+        <hr>
+        <h3>Cards</h3>
+        <div id="card-carousel"></div>
+        <hr>
+        <h3>Generic Properties</h3>
+        <div id="cardgeneral" style="display: flex;">
+            <div id="randcard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                <h3>Top: Card Name ; Card Type</h3>
+                <p>Name is the card itself while type is a group of cards that share the same properties</p>
+                <h3>Middle: Card Image</h3>
+                <p>The image like the name is for identifying the card</p>
+                <h3>Bottom: Card Power</h3>
+                <p>The power is a number that shows how the card affects, bigger the value, more affective it will be
+                </p>
+            </div>
+        </div>
+        <hr>
+        <h3>Types</h3>
+        <div id="cardtypes" style="display: flex;">
+            <div>
+                <img src="assets/cards/TYPE-Action.png">
+                <h3>Action Cards</h3>
+                <p>Related to the actions for the player who uses it, like teleporting or getting resources</p>
+            </div>
+            <div>
+                <img src="assets/cards/TYPE-Build.png">
+                <h3>Build Cards</h3>
+                <p>Creates elements on the map which are owned by the player, like houses</p>
+            </div>
+            <div>
+                <img src="assets/cards/TYPE-Creature.png">
+                <h3>Creature Cards</h3>
+                <p>Applies effects on the map for everyone, like storms</p>
+            </div>
+            <div>
+                <img src="assets/cards/TYPE-Resource.png">
+                <h3>Resource Cards</h3>
+                <p>Resources extracted or gained by the players, which can be used by other cards or as points (end of the game)</p>
+            </div>
+        </div>
+        <hr>
+        <h3>Power</h3>
+        <div id="cardpower">
+            <p>Power is a scale of how affective the card is, higher the number, higher the power</p>
+            <p>Cards with more power affect more than the less powerful ones</p>
+            <p>For example: ender power 1 can get less distance than a power 5 ender</p>
+        </div>
+        <hr>
+        <h4>Axe Card</h4>
+        <div id="Axe">
+            <div id="axecard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Creeper Card</h4>
+        <div id="Creeper">
+            <div id="creepercard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Ender Card</h4>
+        <div id="Ender">
+            <div id="endercard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Enderman Card</h4>
+        <div id="Enderman">
+            <div id="Endermancard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Pick Card</h4>
+        <div id="Pick">
+            <div id="pickcard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Shield Card</h4>
+        <div id="Shield">
+            <div id="shieldcard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Stone Card</h4>
+        <div id="Stone">
+            <div id="stonecard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Sword Card</h4>
+        <div id="Sword">
+            <div id="swordcard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>TNT Card</h4>
+        <div id="Tnt">
+            <div id="tntcard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+        <hr>
+        <h4>Wood Card</h4>
+        <div id="Wood">
+            <div id="woodcard" style="display: flex;width: 40%;"></div>
+            <div style="width: 50%;text-align: left;">
+                
+            </div>
+        </div>
+    </section>
+    <script>
+        function userLogged() {
+            document.getElementById("login").innerHTML = user;
+        }
+        loadUserData();
+
+        randcard = Math.floor(Math.random() * cardsAvailable.length);
+        example1 = new Card(randcard, cardsAvailable[randcard]);
+        document.getElementById("randcard").innerHTML += example1.element()
+
+    </script>
+</body>
+
+</html>

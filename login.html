@@ -1,0 +1,155 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Survival Game</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+    <script src="server.js"></script>
+    <script src="main.js"></script>
+    <style>
+        h1 {
+            font-size: 35px;
+        }
+
+        h1:hover {
+            color: chartreuse;
+        }
+
+        b {
+            color: red;
+        }
+
+        #logbtn {
+            width: 100px;
+            border: outset 2px black;
+            padding: 2px;
+            background-color: green;
+            color: aliceblue;
+        }
+
+        #createbtn {
+            width: 100px;
+            border: outset 2px black;
+            padding: 2px;
+            background-color: purple;
+            color: aliceblue;
+        }
+
+        #login-panel {
+            background-color: black;
+            border: 2px outset white;
+            padding: 5px;
+            margin: 5px;
+            height: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menu">
+        <button id="Header" onclick="redirect(0)">Paper Survival Game</button>
+        <button class="top-option" onclick="redirect(0)">Return</button>
+        <button class="top-option" onclick="redirect(1)" id="login">Log-In</button>
+    </div>
+    <section id="mainbody">
+        <br>
+        <h1>Player Login</h1>
+        <div id="login-panel">
+            <br>
+            <label>USERNAME:</label><input id="login-username" type="text"><br>
+            <label>PASSWORD:</label><input id="login-userpassword" type="password"><br>
+            <b id="login-error"></b>
+            <hr>
+            <button id="logbtn" onclick="LogAccount()">Log-In</button>
+            <button id="createbtn" onclick="createAccount()">Create</button>
+        </div>
+    </section>
+    <script>
+        function userLogged() {
+            document.getElementById("login-panel").innerHTML = "<h1>Player: " + user + "</h1><button onclick=logout() style='background-color: red;'>Log-Out</button>";
+            document.getElementById("login").innerHTML = user;
+        }
+
+        loadUserData();
+
+        //login
+        function LogAccount() {
+            userinput = document.getElementById("login-username").value;
+            passwordinput = document.getElementById("login-userpassword").value;
+            if (userinput != "" && passwordinput != "") {
+                var userref = firebase.database().ref("/users/" + userinput + "/status");
+                var passref = firebase.database().ref("/users/" + userinput + "/password");
+                var isUserCreated;
+                var isJoining = false;
+                userref.on("value", data => {
+                    isUserCreated = data.val();
+                    if (!isJoining) {
+                        isJoining = true;
+                        if (isUserCreated == "online" || isUserCreated == "mod") {
+                            passref.on("value", data => {
+                                canPass = data.val();
+                                if (canPass == passwordinput) {
+                                    localStorage.setItem("user", userinput);
+                                    localStorage.setItem("password", passwordinput);
+                                    location.reload();
+                                } else {
+                                    document.getElementById("login-error").innerHTML = "Incorrect Password";
+                                    document.getElementById("login-userpassword").style.borderColor = "red";
+                                }
+                            })
+                        } else if (isUserCreated == "disabled") {
+                            document.getElementById("login-error").innerHTML = "This account got disabled";
+                            document.getElementById("login-username").style.borderColor = "red";
+                        } else {
+                            document.getElementById("login-error").innerHTML = "Incorrect Username";
+                            document.getElementById("login-username").style.borderColor = "red";
+                        }
+                    }
+                });
+            } else {
+                document.getElementById("login-error").innerHTML = "All the inputs need a value";
+                document.getElementById("login-username").style.borderColor = "yellow";
+                document.getElementById("login-userpassword").style.borderColor = "yellow";
+            }
+        }
+
+        function createAccount() {
+            userinput = document.getElementById("login-username").value;
+            passwordinput = document.getElementById("login-userpassword").value;
+            if (userinput != "" && passwordinput != "") {
+                var userref = firebase.database().ref("/users/" + userinput + "/status");
+                var isUserCreated;
+                var isJoining = false;
+                userref.on("value", data => {
+                    isUserCreated = data.val();
+                    if (!isJoining) {
+                        isJoining = true;
+                        if (isUserCreated == null) {
+                            firebase.database().ref("/users/").child(userinput).update({
+                                password: passwordinput,
+                                status: "online"
+                            });
+                            document.getElementById("login-error").innerHTML = "Account Sucessfuly Created";
+                        } else {
+                            document.getElementById("login-error").innerHTML = "This username already exists";
+                            document.getElementById("login-username").style.borderColor = "red";
+                        }
+                    }
+                });
+            } else {
+                document.getElementById("login-error").innerHTML = "All the inputs need a value";
+                document.getElementById("login-username").style.borderColor = "yellow";
+                document.getElementById("login-userpassword").style.borderColor = "yellow";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            localStorage.removeItem("password");
+            location.reload();
+        }
+    </script>
+</body>
+
+</html>

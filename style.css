@@ -1,0 +1,107 @@
+@font-face {
+    font-family: minecraft;
+    src: url(Minecraft.ttf);
+}
+
+body {
+    background-image: url(assets/StoneBg.png);
+    background-size: 100%;
+    background-repeat: repeat-y;
+    font-family: minecraft;
+}
+
+#mainbody {
+    margin-top: 100px;
+    text-align: center;
+    color: aliceblue;
+}
+
+#menu {
+    text-align: center;
+    border-bottom: white ridge 5px;
+    padding: 4px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 101%;
+    background-image: url(assets/StoneBg.png);
+}
+
+#Header,
+.top-option {
+    color: aliceblue;
+    background-color: rgba(0, 0, 0, 0.600);
+    border: black 5px outset;
+    height: 80px;
+    width: 20%;
+    margin: 5px;
+}
+
+#Header {
+    font-size: large;
+    font-weight: bold;
+    float: left;
+    justify-content: center;
+}
+
+button {
+    font-family: minecraft;
+    cursor: pointer;
+}
+
+.top-option:hover {
+    color: blueviolet;
+    border-color: blueviolet;
+    font-weight: bold;
+}
+
+#Header:hover {
+    color: lime;
+    border-color: lime;
+}
+
+input {
+    color: aliceblue;
+    font-family: Minecraft;
+    background-color: black;
+    border: 2px inset green;
+    padding: 2px;
+    margin: 5px;
+}
+
+#test{
+    color:rgb(7, 167, 7);
+}
+
+.card{
+    padding: 5px;
+    margin: 5px;
+    min-width: 110px;
+    color:white;
+}
+
+.card:hover{
+    box-shadow: 1px 1px 1px white;
+    cursor: pointer;
+}
+
+.card div{
+    border-bottom: 1px solid #ffffffaa;
+}
+
+.card label{
+    text-shadow: 1px 1px 1px black;
+}
+
+.card-top img{
+    width: 20px;
+    float: right;
+    margin-right: 4px;
+}
+
+.card-middle img{
+    width: 100px;
+    height: 100px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
