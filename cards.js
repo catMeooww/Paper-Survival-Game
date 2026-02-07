@@ -1,5 +1,5 @@
 //list of all cards in the game
-var cardsAvailable = ["axe", "creeper", "ender", "enderman", "pick", "shield", "stone", "sword", "Tnt", "Wood"];
+var cardsAvailable = ["Axe", "Creeper", "Ender", "Enderman", "Pick", "Shield", "Stone", "Sword", "Tnt", "Wood"];
 
 //card generator system
 src = "./assets/cards/";
@@ -24,7 +24,7 @@ class Card {
             this.type = "Creature";
             this.background = "#775577";
         } else if (this.card == "Shield") {
-            this.type = "Creature";
+            this.type = "Action";
             this.background = "#ffaaaa";
         } else if (this.card == "Stone") {
             this.type = "Resource";
@@ -33,7 +33,7 @@ class Card {
             this.type = "Action";
             this.background = "#aaaaaa";
         } else if (this.card == "Tnt") {
-            this.type = "Action";
+            this.type = "Build";
             this.background = "#ffaaaa";
         } else if (this.card == "Wood") {
             this.type = "Resource";
