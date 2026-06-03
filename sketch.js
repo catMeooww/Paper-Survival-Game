@@ -10,6 +10,7 @@ roomName = url[1];
 gameWidth = window.innerWidth;
 gameHeight = window.innerHeight;
 
+roomVisibility = "public";
 selectedMap = "";
 mapData = "";
 isHost = false;
@@ -18,6 +19,8 @@ mapReady = false;
 canPlace = false;
 interacting = false;
 usingCard = false;
+playerX = 0;
+playerY = 0;
 gridX = 0;
 gridY = 0;
 
@@ -70,7 +73,7 @@ function loadMapData() {
     //map data
     firebase.database().ref("/maps/" + roomName + "/map").on("value", data => {
         selectedMap = data.val();
-        fetch('./assets/worlds/' + selectedMap + ".json")
+        fetch('./assets/worlds/' + selectedMap + ".craftymap")
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -89,8 +92,14 @@ function loadMapData() {
     firebase.database().ref("/maps/" + roomName + "/host").on("value", data => {
         if (user == data.val()) {
             isHost = true;
-            document.getElementById("startButton").style.visibility = "visible";
+            for(e=0;e < document.getElementsByClassName("hostmenu").length;e++){
+                document.getElementsByClassName("hostmenu").item(e).style.visibility = "visible";
+            }
         }
+    });
+    firebase.database().ref("/maps/" + roomName + "/visibility").on("value", data => {
+        roomVisibility = data.val();
+        document.getElementById("visibilityButton").innerHTML = "<label>Room: </label><button onclick='changeAccess()'>"+roomVisibility+"</button>";
     });
     //load players
     firebase.database().ref("/maps/" + roomName + "/players").on('value', function (snapshot) {
@@ -119,7 +128,9 @@ function loadMapData() {
             }
             mapReady = true;
             document.getElementById("lobby").style.visibility = "hidden";
-            document.getElementById("startButton").style.visibility = "hidden";
+            for(e=0;e < document.getElementsByClassName("hostmenu").length;e++){
+                document.getElementsByClassName("hostmenu").item(e).style.visibility = "hidden";
+            }
         }
     });
 }
@@ -277,6 +288,7 @@ function preload() {
     chestAsset = loadImage("./assets/map/Chest.png");
     villagerAsset = loadImage("./assets/map/Villager.png");
     tntAsset = loadImage("./assets/map/Tnt.png");
+    houseAsset = loadImage("./assets/map/House.png");
 }
 
 function setup() {
@@ -355,6 +367,8 @@ function draw() {
                             image(villagerAsset, resourceX, resourceY, 50, 50);
                         } else if (resourceType == "tnt") {
                             image(tntAsset, resourceX, resourceY, 50, 50);
+                        } else if (resourceType == "house") {
+                            image(houseAsset, resourceX, resourceY, 50, 50);
                         }
                     });
                 }
@@ -417,13 +431,13 @@ function draw() {
                     }
                 }
             });
-            firebase.database().ref("/maps/" + roomName + "/event/weather").on("value",data=>{
+            firebase.database().ref("/maps/" + roomName + "/event/weather").on("value", data => {
                 weather = data.val()
-                if(weather == "explosive"){
+                if (weather == "explosive") {
                     fill("rgba(255,0,0,0.2)");
                     strokeWeight(0);
                     rect((camera.x - gameWidth / 2), (camera.y + 20 - gameHeight / 2), gameWidth, gameHeight);
-                }else if(weather == "ender"){
+                } else if (weather == "ender") {
                     fill("rgba(255,0,255,0.2)");
                     strokeWeight(0);
                     rect((camera.x - gameWidth / 2), (camera.y + 20 - gameHeight / 2), gameWidth, gameHeight);
@@ -488,7 +502,7 @@ function draw() {
                                 ) {
                                     if (hovering == "none") {
                                         canPlace = true;
-                                    } else if ((hovering[1] == "craft" && hovering[2]['own'] != user)) {
+                                    } else if ((hovering[1] == "craft" || hovering[1] == "house") && hovering[2]['own'] != user) {
                                         canPlace = true;
                                         interacting = hovering;
                                     } else {
@@ -525,6 +539,26 @@ function draw() {
                                 } else {
                                     canPlace = false;
                                 }
+                            } else if (selectedCard[1] == "Arrows") {
+                                usingCard = true;
+                                interacting = false;
+                                if (distX <= 50 && distY <= 50) {
+                                    canPlace = true;
+                                } else {
+                                    canPlace = false;
+                                }
+                            } else if (selectedCard[1] == "House") {
+                                usingCard = true;
+                                interacting = false;
+                                if (
+                                    distX <= 50 * (selectedCard[2] + 2) && distY <= 50 * (selectedCard[2] + 2)
+                                    && (hovering == "none")
+                                    && getLocalBiome(gridX / 50, gridY / 50) != "water"
+                                ) {
+                                    canPlace = true;
+                                } else {
+                                    canPlace = false;
+                                }
                             } else {
                                 usingCard = false;
                                 if (
@@ -548,7 +582,7 @@ function draw() {
                             interacting = false;
                         }
 
-                        if (selectedCard[3] == "Creature") {
+                        if (selectedCard[3] == "Weather") {
                             fill("rgba(255,0,255,0.6)");
                         } else if (canPlace) {
                             fill("rgba(0,255,0,0.6)");
@@ -566,6 +600,7 @@ function draw() {
                 }
             });
         }
+        //update window
         if (lowUpdates >= 15) {
             //get latest sizes
             previousGameWidth = gameWidth;
@@ -573,7 +608,7 @@ function draw() {
             gameWidth = window.innerWidth;
             gameHeight = window.innerHeight;
             if (gameWidth != previousGameWidth || gameHeight != previousGameHeight) {
-                console.debug("Change Game Window Size");
+                console.info("Change Game Window Size");
                 resizeCanvas(gameWidth, gameHeight - 33)
             }
             //list cards
@@ -654,7 +689,17 @@ function mouseClicked() {
                 points: userPoints + selectedCard[2]
             })
         } else if (selectedCard[1] == "Sword") {
-            if (!interacting) {
+            if (interacting[1] == "craft") {
+                attack(interacting[2]['own'],10);
+                firebase.database().ref("/maps/" + roomName + "/elements/").update({
+                    [interacting[0]]: null
+                });
+            } else if (interacting[1] == "house") {
+                attack(interacting[2]['own'],interacting[2]['bonus']);
+                firebase.database().ref("/maps/" + roomName + "/elements/").update({
+                    [interacting[0]]: null
+                });
+            } else {
                 firebase.database().ref("/maps/" + roomName + "/players").once('value', function (snapshot) {
                     snapshot.forEach(function (childSnapshot) {
                         childKey = childSnapshot.key; childData = childSnapshot.val();
@@ -668,16 +713,6 @@ function mouseClicked() {
                             }
                         }
                     });
-                });
-            } else {
-                firebase.database().ref("/maps/" + roomName + "/players/" + interacting[2]['own'] + "/points").once('value', data => {
-                    targetScore = data.val()
-                    firebase.database().ref("/maps/" + roomName + "/players/" + interacting[2]['own']).update({
-                        points: targetScore - selectedCard[2]
-                    })
-                })
-                firebase.database().ref("/maps/" + roomName + "/elements/").update({
-                    [interacting[0]]: null
                 });
             }
         } else if (selectedCard[1] == "Tnt") {
@@ -698,6 +733,31 @@ function mouseClicked() {
                 weather: "ender",
                 by: user
             })
+        } else if (selectedCard[1] == "House") {
+            firebase.database().ref("/maps/" + roomName + "/elements/").push({
+                type: "house",
+                own: user,
+                x: Math.floor(gridX / 50),
+                y: Math.floor(gridY / 50),
+                bonus: selectedCard[2]
+            })
+            firebase.database().ref("/maps/" + roomName + "/players/" + user).update({
+                points: userPoints + selectedCard[2]
+            })
+        } else if (selectedCard[1] == "Arrows") {
+            firebase.database().ref("/maps/" + roomName + "/players").once('value', function (snapshot) {
+                snapshot.forEach(function (childSnapshot) {
+                    childKey = childSnapshot.key; childData = childSnapshot.val();
+                    targetScore = childData['points']
+                    targetName = childKey;
+                    if (targetName != user) {
+                        thisclick = "attack('" + targetName + "',"+selectedCard[2]+")";
+                        thisbutton = '<button onclick="' + thisclick + '">' + targetName + '|' + targetScore + '</button>';
+                        document.getElementById("targets").innerHTML += thisbutton;
+                    }
+                });
+            });
+            document.getElementById("targets").style.visibility = "visible";
         } else {
             firebase.database().ref("/maps/" + roomName + "/players/" + user).update({
                 x: gridX,
@@ -782,4 +842,35 @@ function restartGame() {
         status: "waiting",
     });
     location.reload();
+}
+
+function pauseMenu() {
+    console.log("menu")
+    if (document.getElementById("paused").style.visibility == "visible") {
+        document.getElementById("paused").style.visibility = "hidden";
+    } else {
+        document.getElementById("paused").style.visibility = "visible";
+    }
+}
+
+function changeAccess(){
+    if(roomVisibility == "public"){
+        firebase.database().ref("/maps/" + roomName).update({
+            visibility: "private"
+        });
+    }else{
+        firebase.database().ref("/maps/" + roomName).update({
+            visibility: "public"
+        });
+    }
+}
+
+function attack(targetid, damage) {
+    document.getElementById("targets").style.visibility = "hidden";
+    firebase.database().ref("/maps/" + roomName + "/players/" + targetid + "/points").once('value', data => {
+        targetScore = data.val()
+        firebase.database().ref("/maps/" + roomName + "/players/" + targetid).update({
+            points: targetScore - damage
+        });
+    });
 }

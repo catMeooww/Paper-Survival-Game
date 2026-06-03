@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Survival Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="./assets/map/Stone.png" type="image/png">
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+    <script src="server.js"></script>
+    <script src="cards.js"></script>
+    <script src="main.js"></script>
+    <style>
+        h1 {
+            font-size: 35px;
+        }
+
+        h1:hover {
+            color: chartreuse;
+        }
+
+        #banner {
+            background: url("./assets/banner.png");
+            background-size: cover;
+            padding: 5%;
+        }
+
+        #banner p,
+        #banner h1 {
+            background-color: rgba(0, 0, 0, 0.5);
+            margin: 0px;
+            padding: 2px;
+        }
+
+        #room-enter button{
+            background-color: lightgreen;
+        }
+
+        .room-div{
+            width: 90%;
+            padding: 5px;
+            margin: 5px;
+            border: black 2px outset;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-self: center;
+        }
+
+        .room-div:hover{
+            cursor: pointer;
+            border-color: lime;
+        }
+    </style>
+</head>
+
+<body onload="getRoomList()">
+    <div id="menu">
+        <button id="Header" onclick="redirect(0)">Paper Survival Game</button>
+        <button class="top-option" onclick="redirect(0)">Return</button>
+        <button class="top-option" onclick="redirect(1)" id="login">Log-In</button>
+    </div>
+    <section id="mainbody">
+        <div id="banner">
+            <br>
+            <h1>Paper Survival Game</h1>
+            <br><br>
+            <p>Find Rooms</p>
+            <br><br><br><br><br><br><br><br><br><br><br><br>
+            <p>Type Room ID or join a public room</p>
+            <br>
+        </div>
+        <div id="room-enter">
+            <h1>Join Private Room</h1>
+            <h3>Room ID</h3>
+            <input id="room-id">
+            <button onclick="privateRoom()">Join</button>
+        </div>
+        <hr>
+        <div id="roomlist">
+            <h1>Join Public Rooms</h1>
+        </div>
+    </section>
+    <script>
+        function userLogged() {
+            document.getElementById("login").innerHTML = user;
+        }
+        loadUserData();
+
+        function getRoomList() {
+            firebase.database().ref("/maps/").on('value', function (snapshot) {
+                document.getElementById("roomlist").innerHTML = "<h1>Join Public Rooms</h1>";
+                snapshot.forEach(function (childSnapshot) {
+                    childKey = childSnapshot.key; childData = childSnapshot.val();
+                    if(childData["visibility"] == "public"){
+                        roomId = childKey;
+                        playerQuantity = Object.values(childData["players"]).length;
+                        if(playerQuantity<3){
+                            quantityStyle = "green";
+                        }else if(playerQuantity==3){
+                            quantityStyle = "orange";
+                        }else{
+                            quantityStyle = "red";
+                        }
+                        joinFunction = "publicRoom(`"+childKey+"`)";
+                        nameHolder = "<h2>"+roomId+"</h2>";
+                        quantityHolder = "<p style='background-color: "+quantityStyle+"'>"+playerQuantity+"/4</p>";
+                        document.getElementById("roomlist").innerHTML += "<div class='room-div' onclick='"+joinFunction+"'>"+nameHolder+quantityHolder+"</div>";
+                    }
+                });
+            });
+        }
+
+        function publicRoom(id){
+            window.location = "game.html?" + id;
+        }
+
+        function privateRoom(){
+            id = document.getElementById("room-id").value;
+            if(id != ""){
+            window.location = "game.html?" + id;
+            }else{
+                document.getElementById("room-id").style.borderColor = "red";
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -6,6 +6,8 @@ function redirect(n) {
       window.location = "index.html";
    } else if (n == 1) {
       window.location = "login.html";
+   } else if (n == 2) {
+      window.location = "explore.html";
    }
 }
 
@@ -41,11 +43,12 @@ function newRoom() {
                } else {
                   firebase.database().ref("/maps/" + roomName).set({
                      disponible: true,
+                     visibility: "public",
                      status: "waiting",
                      host: user,
                      map: mapSelection
                   });
-                  window.location = "game.html?"+roomName;
+                  window.location = "game.html?" + roomName;
                }
             }
          });
@@ -59,16 +62,16 @@ function newRoom() {
 
 //card-show
 cards = [];
-function loadedPage(){
-   for(type of cardsAvailable){
-      example = new Card(cards.length,type);
+function loadedPage() {
+   for (type of cardsAvailable) {
+      example = new Card(cards.length, type);
       cards.push(example);
       document.getElementById("card-carousel").innerHTML += example.element();
    }
 }
 
-function selectCard(card){
+function selectCard(card) {
    data = cards[card].data();
    console.log(data);
-   window.location = "about.html#"+data["card"];
+   window.location = "about.html#" + data["card"];
 }

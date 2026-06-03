@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paper Survival Game</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="./assets/map/ExplorerPlayer.png" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
     <script src="server.js"></script>
@@ -78,7 +79,48 @@
             left: 0px;
         }
 
-        .headerbtn, .headerinfo {
+        .ui {
+            position: fixed;
+            visibility: hidden;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px white outset;
+            z-index: 7;
+            text-align: center;
+        }
+
+        .ui button {
+            width: 90%;
+            color: white;
+            background-color: black;
+            margin: 2px;
+            padding: 5px;
+        }
+
+        .ui button:hover {
+            color: aqua;
+            border-color: lime;
+        }
+
+        .hostmenu {
+            visibility: hidden;
+        }
+
+        #lobbybar{
+            margin: 2px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+        }
+
+        #lobbybar button{
+            background-color: lightgreen;
+        }
+
+        .headerbtn,
+        .headerinfo {
             background-color: rgba(0, 0, 0, 0.7);
             border: black 5px outset;
             color: aliceblue;
@@ -95,11 +137,12 @@
             color: red;
         }
 
-        .headerinfo{
+        .headerinfo {
             float: right;
         }
 
-        .card, #uncard {
+        .card,
+        #uncard {
             width: 110px;
             height: 160px;
         }
@@ -108,7 +151,7 @@
             padding: 5px;
             margin: 5px;
             background-color: darkslategray;
-            border:2px outset gray;
+            border: 2px outset gray;
             text-align: center;
             align-content: center;
             cursor: pointer;
@@ -118,23 +161,34 @@
 
 <body onload="loadMapData()">
     <div id="lobby">
-        <p id="login" style="color: orange;"></p>
-        <button class="closebutton" style="float: right;background-color: greenyellow;"
-            onclick="userOff()">Leave</button>
+        <div id="lobbybar">
+            <label id="login" style="color: orange;"></label>
+            <div class="hostmenu" id="visibilityButton"></div>
+            <button class="closebutton" onclick="userOff()">Leave</button>
+        </div>
         <center>
             <h1 id="roomname"></h1>
             <h3 id="roommap"></h3>
             <div id="endResultData"></div>
             <div id="roomplayers" style="height: 300px;"></div>
-            <div id="startButton" style="visibility: hidden;">
+            <div class="hostmenu" id="startButton">
                 <button onclick="generateMap()"
                     style="background-color: greenyellow;border: 2px green outset;color:blue;width: 60%;">Start</button>
             </div>
         </center>
     </div>
-    
+
+    <div class="ui" id="paused">
+        <h2>Paper Survival Game</h2>
+        <hr>
+        <button onclick="pauseMenu()">Continue</button>
+        <button class="closebutton" onclick="userOff()">Leave</button>
+        <hr>
+    </div>
+    <div class="ui" id="targets"></div>
+
     <section id="data-menu">
-        <button class="headerbtn" onclick="pauseMenu()">Pause Menu</button>
+        <button class="headerbtn" onclick="pauseMenu()">Menu</button>
         <button class="headerbtn" onclick="camCenter()">Center Camera</button>
         <button class="headerbtn closebutton" onclick="userOff()">Leave</button>
         <label class="headerinfo" id="player-count">players: 0</label>
